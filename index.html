@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+<link rel="stylesheet" tmusice="text/css" href="css/style.css">
+<title></title>
+<script src="js/Datum.js"></script>
+<script src="js/RecordPlug-in.js"></script>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border: 0px solid red;
+  font-family: 'Press Start 2P', cursive;
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  -khtml-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none; 
+  user-select:none;
+}
+
+html, body {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 100%;
+  overflow: hidden; 
+  background-color: #E9F0F6;
+  transform: translate(0%);
+  font-family: 'MyCustomFont', sans-serif;
+} 
+@font-face {
+  font-family: 'MyCustomFont';
+  src: url('ttf/b.ttf') format('truetype');
+}
+ 
+
+</style>
+</head>
+<body>
+
+<!-- 
+迷宫小游戏
+开发者：一个陌生朋友（小杨）
+完成日期：2024-12［3334832289@qq.com］
+-->
+
+<!-- 浏览器页 -->
+<div class="preview-card" id="previewCard">
+  <div class="HeadWebPage">
+    <button class="close-button" id="closeButton"></button>
+    <h2 id="previewTitle">网页预览</h2>
+    <button class="refresh-button" id="refreshButton"></button>
+    <div id="progressBar">
+      <div id="progressBarFull"></div>
+    </div>
+  </div>
+  <iframe id="previewFrame" src="" title="网页预览" style="display: none;"></iframe>
+</div>
+
+<div class="bodys"></div>
+
+<div class="Abutbox" id="Abutbox"></div>
+<div class="Bottom─card">
+  <div id="Bottom─card-a" class="carda">
+    <img class="imga" src="img/Bz.png">
+  </div>
+  <div id="Bottom─card-b" class="cardb">
+    <h1></h1>
+    <p id="ts">Hello</p>
+  </div>
+  <div id="Bottom─card-c" class="cardc">
+    <div class="Bubu">
+      <img src="img/gif/布布9.gif"/>
+    </div>
+    <img class="imgx" src="img/gif/xin.gif">
+    <div class="Onetwo">
+      <img src="img/gif/一二18.gif"/>
+    </div>
+  </div>
+</div>
+
+<!-- 首页 -->
+<div id="homePage" class="page active">
+  <div class="Head">
+    <span>熊</span>
+    <span>熊</span>
+    <img src="img/gif/布布16.gif"/>
+    <span>迷</span>
+    <span>宫</span>
+  </div>
+  <div class="gnbtn">
+    <button class="button" id="previewButton"></button>
+    <button id="Abutbtn"></button>
+    <button onclick="shareApp()"></button>
+  </div>
+  <button class="startbtn" onclick="showPage('levelPage')">点击开始</button>
+</div>
+
+<!-- 关卡页面 -->
+<div id="levelPage" class="page">
+  <div class="Headb">
+    <button class="button" onclick="showPage('homePage')"></button>
+    <h2>关卡</h2>
+    <button id="openButton"></button>
+  </div>
+  <div id="levelList"></div>
+</div>
+
+<!-- 游戏页面 -->
+<div id="gamePage" class="page">
+  <div class="Headc">
+    <button class="button" onclick="showPage('levelPage')"></button> 
+    <h2 id="gameHeader">游戏中</h2>
+    <button class="button" id="musicToggleButton" onclick="toggleMusic()"></button>
+  </div>
+  <div class="gameCanvasbox">
+    <div id="gameCanvas"></div>
+  </div>
+</div>
+
+<!-- 模态框 -->
+<div id="myModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span id="modalMessage"></span>
+    </div>
+    <div class="modal-footer">
+      <span id="starRating"></span>
+    </div>
+
+    <div class="btnbox">
+      <button class="modal-button" onclick="goToHomePage()"></button>
+      <button class="modal-button" id="cancelButton"></button>
+      <button class="modal-button" id="confirmButton"></button>
+    </div>
+   
+  </div>
+</div>
+
+<!-- Mod菜单 -->
+<div id="overlay"></div>
+<div id="card">
+  <div class="card-box">
+    <h2 id="tst">MOD菜单</h2>
+    <p id="tsp">解锁星级立即获得所有关卡的三星级满星，解锁全部关卡开放所有关卡，自由选择游玩，使用解锁后会降低游戏挑战性与乐趣。重置游戏清除所有进度恢复至初始状态重新开始。</p>
+    <div class="gnbtnbox">
+      <button id="fullStarButton">解锁星级</button>
+      <button id="unlockAllButton">解锁全部</button>
+      <button id="clearProgressButton">重置游戏</button>
+      <button id="CancelButton" style="display: none;">取消重置</button>
+      <button id="OkButton" style="display: none;">确定重置</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="js/Clickon.js"></script>
+<script src="js/gameData.js"></script>
+<script src="js/background2.js"></script>
+
+<script>
+
+/**
+ * 
+ * 迷宫小游戏
+ * 开发者：一个陌生朋友（小杨）
+ * 日期：2024-12［3334832289@qq.com］
+ * 
+ */
+ 
+// Mod 菜单
+const openButton = document.getElementById('openButton');
+const overlay = document.getElementById('overlay');
+const card = document.getElementById('card');
+
+openButton.addEventListener('click', () => {
+  overlay.style.display = 'block';
+  card.classList.add('show');
+  card.classList.remove('hide'); // 确保在显示时移除隐藏类
+});
+
+overlay.addEventListener('click', () => {
+  card.classList.remove('show');
+  card.classList.add('hide'); // 添加隐藏类以触发动画
+
+  // 等待动画完成后再隐藏 overlay
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    card.classList.remove('hide'); // 移除隐藏类以便下次显示
+  }, 500); // 500ms 过渡时间
+});
+
+// 满星解锁事件处理函数
+document.getElementById('fullStarButton').addEventListener('click', function() {
+  // 仅在按钮未被激活时执行操作
+  if (!this.classList.contains('active')) {
+    // 更新所有已解锁关卡的星级
+    mazeData.forEach((_, index) => {
+      if (unlockedLevels.includes(index)) {
+        levelStars[index] = 3; // 设置星级为3星
+        document.querySelector(`.level-card:nth-child(${index + 1}) .stars`).textContent = getStars(index);
+      }
+    });
+
+    this.classList.add('active'); // 设置按钮为激活状态
+    playSound('unlock'); // 播放解锁音效
+    saveProgress(); // 保存进度
+  }
+});
+
+// 解锁全部按钮事件处理函数
+document.getElementById('unlockAllButton').addEventListener('click', function() {
+  // 仅在按钮未被激活时执行操作
+  if (!this.classList.contains('active')) {
+    // 更新解锁状态
+    unlockedLevels.length = 0; // 清空解锁数组
+    mazeData.forEach((_, index) => {
+      unlockedLevels.push(index); // 解锁所有关卡
+    });
+
+    loadLevels(); // 重新加载关卡
+    this.classList.add('active'); // 设置按钮为激活状态
+    playSound('unlock'); // 播放解锁音效
+    saveProgress(); // 保存进度
+  }
+});
+
+
+// 获取按钮元素
+const cancelButton = document.getElementById('CancelButton');
+const okButton = document.getElementById('OkButton');
+const tsp = document.getElementById('tsp');
+const fullStarButton = document.getElementById('fullStarButton');
+const unlockAllButton = document.getElementById('unlockAllButton');
+const clearProgressButton = document.getElementById('clearProgressButton');
+
+// 初始化UI状态
+function initUI() {
+  updateButtonVisibility(true);
+  updateTspContent("解锁星级立即获得所有关卡的三星级满星，解锁全部关卡开放所有关卡，自由选择游玩，使用解锁后会降低游戏挑战性与乐趣。重置游戏清除所有进度恢复至初始状态重新开始。");
+}
+
+// 更新按钮状态的函数
+function updateButtonVisibility(showMainButtons) {
+  fullStarButton.style.display = showMainButtons ? 'block' : 'none';
+  unlockAllButton.style.display = showMainButtons ? 'block' : 'none';
+  cancelButton.style.display = showMainButtons ? 'none' : 'block';
+  okButton.style.display = showMainButtons ? 'none' : 'block';
+  clearProgressButton.style.display = showMainButtons ? 'block' : 'none';
+}
+
+// 更新tsp内容的函数
+function updateTspContent(message) {
+  tsp.textContent = message;
+}
+
+// 清空进度按钮点击事件
+clearProgressButton.addEventListener('click', function() {
+  // 震动反馈
+  if (navigator.vibrate) {
+    navigator.vibrate(500); // 震动500毫秒
+  }
+
+  // 触发 shake 动画
+  card.classList.add('shake'); // 添加 shake 类触发动画
+
+  // 动画完成后移除 shake 类并显示确认对话框
+  setTimeout(() => {
+    card.classList.remove('shake');
+    showConfirmDialog(true); // 传递一个参数 overlay 和 card 可见状态
+  }, 500); // 500ms 是动画持续时间
+});
+
+// 更新 showConfirmDialog 函数，确保 overlay 和 card 可见状态
+function showConfirmDialog(keepVisible) {
+  updateButtonVisibility(false);
+  updateTspContent('确定要清空所有游戏进度从头开始吗？');
+  if (!keepVisible) {
+    // 不改变 overlay 的显示状态
+    card.classList.remove('show');
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      card.classList.remove('hide'); // 移除隐藏类以便下次显示
+    }, 500); // 等待动画完成后隐藏 overlay
+  }
+}
+
+// 取消按钮点击事件
+cancelButton.addEventListener('click', () => {
+  // 隐藏取消和确定显示其他按钮
+  initUI();
+});
+
+// 确定按钮点击事件
+okButton.addEventListener('click', function() {
+  // 执行清空操作
+  localStorage.removeItem('unlockedLevels');
+  localStorage.removeItem('levelStars');
+
+  // 重置游戏状态
+  const defaultUnlockedLevels = [0, 1]; // 默认解锁1-2关卡
+  const defaultLevelStars = [2, ...new Array(mazeData.length - 1).fill(0)]; // 关卡2默认两颗星其余为0
+
+  // 保存默认进度到本地存储
+  localStorage.setItem('unlockedLevels', JSON.stringify(defaultUnlockedLevels));
+  localStorage.setItem('levelStars', JSON.stringify(defaultLevelStars));
+
+  // 关闭MOD菜单卡片
+  card.classList.remove('show');
+  setTimeout(() => {
+    overlay.style.display = 'none';
+  }, 500); // 等待动画完成后隐藏 overlay
+
+  // 重置游戏UI状态
+  window.location.reload(); // 刷新页面恢复默认
+});
+
+
+// 绑定 Abutbtn / box 元素
+const box = document.getElementById('Abutbox');
+const button = document.getElementById('Abutbtn');
+let isExpanded = false;
+
+let currentLevel = 0;
+let playerPosition = { x: 1, y: 1 };
+let npcs = []; // 存储多个npc的位置
+let moveInterval;
+let npcIntervals = []; // 存储每个npc的移动定时器
+let moveDirection = null;
+let isGameActive = false; // 用于标记游戏是否正在进行中
+let startTime; // 记录游戏开始时间
+
+// 记录解锁的关卡
+// 从 localStorage 获取解锁关卡，默认解锁1-2关卡
+const unlockedLevels = JSON.parse(localStorage.getItem('unlockedLevels')) || [0, 1]; 
+
+// 从 localStorage 获取星级数据，第一关默认两颗星，其余星级为0
+const levelStars = JSON.parse(localStorage.getItem('levelStars')) || [2, ...new Array(mazeData.length - 1).fill(0)]; 
+
+// 音频数组存放不同音效文件
+const audioFiles = {
+  buttonClick: new Audio('music/yx/点击.m4a'), // 按钮点击音效
+  gameWin: new Audio('music/yx/通关b.m4a'), // 游戏通关音效
+  gameLose: new Audio('music/yx/通关失败.m4a'), // 游戏失败音效
+  teleport: new Audio('music/yx/传送.m4a'), // 传送音效
+  unlock: new Audio('music/yx/解锁.m4a'), // 解锁音效
+  clear: new Audio('music/yx/清空.m4a') // 清空音效
+};
+
+
+// 背景BGM对象
+const backgroundMusic = new Audio('music/bgm/bgmb.m4a');
+backgroundMusic.loop = true; // 设置为循环播放
+
+let isMusicPlaying = localStorage.getItem('isMusicPlaying') === 'false'; // 从 localStorage 获取BGM状态
+
+// 播放音效的函数
+function playSound(sound) {
+  if (audioFiles[sound]) {
+    audioFiles[sound].currentTime = 0; // 重置音频到开始
+    audioFiles[sound].play(); // 播放音频
+  }
+}
+
+// showPage 函数
+function showPage(pageId) {
+  resetGame(); // 重置游戏状态
+  document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+
+  // 隐藏所有 Bottom─card 子元素
+  const bottomCards = document.querySelectorAll('.Bottom─card > div'); // 选择器更具体
+  bottomCards.forEach(card => {
+    card.classList.remove('show');
+    card.classList.add('hide');
+  });
+
+  // 根据页面 ID 动态 Bottom─card 调整变化
+  const bottomCard = document.querySelector('.Bottom─card');
+  if (pageId === 'homePage') {
+    bottomCard.style.width = '100%';
+    bottomCard.style.height = '25em';
+    bottomCard.style.bottom = '0em';
+    bottomCard.style.opacity = '0.8',
+    bottomCard.style.borderRadius = '0';
+    bottomCard.style.backgroundColor = 'Transparent';
+    const cardA = document.getElementById('Bottom─card-a');
+    cardA.classList.remove('hide');
+    cardA.classList.add('show');
+  } else if (pageId === 'levelPage') {
+    bottomCard.style.width = '90%';
+    bottomCard.style.height = '3em';
+    bottomCard.style.bottom = '1.2em';
+    bottomCard.style.opacity = '0.8',
+    bottomCard.style.borderRadius = '0.5em';
+    bottomCard.style.backgroundColor = 'White';
+    const cardB = document.getElementById('Bottom─card-b');
+    cardB.classList.remove('hide');
+    cardB.classList.add('show');
+  } else if (pageId === 'gamePage') {
+    bottomCard.style.width = '100%';
+    bottomCard.style.height = '5em';
+    bottomCard.style.bottom = '0em';
+    bottomCard.style.opacity = '0.8',
+    bottomCard.style.borderRadius = '2em';
+    bottomCard.style.backgroundColor = 'White';
+    const cardC = document.getElementById('Bottom─card-c');
+    cardC.classList.remove('hide');
+    cardC.classList.add('show');
+  }
+
+  playSound('buttonClick'); // 播放按钮点击音效
+
+  // 仅在不是首页的情况下将新状态推送到历史记录中。
+  if (pageId !== 'homePage') {
+    const currentState = window.history.state;
+    if (!currentState || currentState.pageId !== pageId) {
+      window.history.pushState({ pageId }, '', `#${pageId}`);
+    }
+  }
+
+  if (pageId === 'levelPage') {
+    loadLevels();
+  } else if (pageId === 'gamePage') {
+    loadGame(currentLevel);
+    startTime = Date.now(); // 记录开始时间
+    isGameActive = true; // 游戏开始时设置为活动状态
+  } else {
+    isGameActive = false; // 其他页面设置为非活动状态
+  }
+}
+
+
+// 在页面加载时调用 showPage 函数
+window.addEventListener('DOMContentLoaded', (event) => {
+  showPage('homePage'); // 默认显示首页
+});
+
+// 监听浏览器返回事件
+window.addEventListener('popstate', function(event) {
+  if (navigator.vibrate) {
+    navigator.vibrate(100); 
+  }
+  if (event.state) {
+    showPage(event.state.pageId); // 根据历史记录显示相应的页面
+  } else {
+    showPage('homePage'); // 如果没有状态返回首页
+  }
+});
+
+// 点击Abutbox时切换 box 的状态
+button.addEventListener('click', (event) => {
+  if (isExpanded) {
+    box.style.animation = 'collapse 0.5s ease forwards';
+  } else {
+    box.style.animation = 'expand 0.5s ease forwards';
+  }
+  isExpanded = !isExpanded;
+  event.stopPropagation(); // 阻止事件冒泡到 document
+});
+// 点击 box 本身则关闭状态
+box.addEventListener('click', (event) => {
+  if (isExpanded) {
+    box.style.animation = 'collapse 0.5s ease forwards';
+    isExpanded = false;
+  }
+  event.stopPropagation(); // 阻止事件冒泡到 document
+});
+// 点击任意区域光 box 状态
+document.addEventListener('click', () => {
+  if (isExpanded) {
+    box.style.animation = 'collapse 0.5s ease forwards';
+    isExpanded = false;
+  }
+});
+
+
+// 重置游戏状态的函数 ===========
+function resetGame() {
+  clearInterval(moveInterval);
+  clearNpcIntervals(); // 清除所有npc移动定时器
+  isGameActive = false; // 设置游戏状态为非活动状态
+}
+
+// 关卡加载函数
+function loadLevels() {
+  const levelList = document.getElementById('levelList');
+  levelList.innerHTML = '';
+  let lastUnlockedIndex = -1; // 记录最后一个解锁的关卡索引
+
+  mazeData.forEach((_, index) => {
+    const card = document.createElement('div');
+    card.className = 'level-card' + (unlockedLevels.includes(index) ? '' : ' locked');
+    card.innerHTML = `
+      <div class="Hao">${index + 1}</div>
+      <div class="stars">${getStars(index)}</div>
+      <img class="Guan" src="img/gif/g1.gif"/>
+    `;
+    card.onclick = () => {
+      if (unlockedLevels.includes(index)) {
+        currentLevel = index;
+        playSound('buttonClick'); // 播放按钮点击音效
+        showPage('gamePage');
+      }
+    };
+    levelList.appendChild(card);
+    
+    // 如果该关卡已解锁，更新最后一个解锁的关卡索引
+    if (unlockedLevels.includes(index)) {
+      lastUnlockedIndex = index;
+    }
+
+    // 使用 setTimeout 来逐个显示卡片
+    setTimeout(() => {
+      card.classList.add('show'); // 添加显示类
+    }, index * 10); // 每个卡片延迟 10ms
+  });
+
+  // 空白占位卡片
+  const placeholderCount = 6; // 添加6个占位
+  for (let i = 0; i < placeholderCount; i++) {
+    const placeholderCard = document.createElement('div');
+    placeholderCard.className = 'level-card placeholder';
+    placeholderCard.innerHTML = `<div class="Hao">?</div>`;
+    placeholderCard.style.opacity = '0'; // 透明度为0
+    levelList.appendChild(placeholderCard);
+
+    // 使用 setTimeout 逐个显示
+    setTimeout(() => {
+      placeholderCard.classList.add('show'); // 添加显示类
+    }, (mazeData.length + i) * 5); // 每个卡片延迟 5ms
+  }
+
+  // 在所有卡片加载完成后滚动到当前关卡
+  setTimeout(() => {
+    if (lastUnlockedIndex !== -1) { // 确保至少有一个解锁的关卡
+      const currentCard = levelList.children[currentLevel]; // 获取当前关卡卡片
+      if (currentCard) {
+        currentCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); // 平滑滚动到当前关卡
+      }
+    }
+  }, (mazeData.length + placeholderCount) * 11); // 在所有卡片显示后执行滚动
+}
+
+
+function getStars(level) {
+  return '★'.repeat(levelStars[level] || 0) + '☆'.repeat(3 - (levelStars[level] || 0));
+}
+
+function loadGame(level) {
+  const gameCanvas = document.getElementById('gameCanvas');
+  gameCanvas.innerHTML = '';
+  const maze = mazeData[level];
+
+  // 更新游戏标题
+  const gameHeader = document.getElementById('gameHeader');
+  gameHeader.textContent = `${level + 1}-100`; // 显示当前关卡
+
+  npcs = []; // 清空npc数组
+  maze.forEach((row, y) => {
+    row.forEach((cell, x) => {
+      const div = document.createElement('div');
+      div.classList.add('cell');
+      if (cell === 1) div.classList.add('wall');
+      if (cell === 8) div.classList.add('exit');
+      if (cell === 6) {
+        div.classList.add('start');
+        playerPosition = { x, y };
+      }
+      if (cell === 9) {
+        div.classList.add('npc'); // 添加类 npc
+        npcs.push({ x, y }); // 将npc位置添加到数组中
+      }
+      if ([2, 3, 4, 5, 7].includes(cell)) div.classList.add('portal');
+      gameCanvas.appendChild(div);
+    });
+  });
+  updatePlayerPosition();
+  updateNpcPositions(); // 更新所有npc位置
+  startNpcMovements(); // 开始所有npc移动
+}
+
+function updatePlayerPosition() {
+  document.querySelectorAll('.player').forEach(cell => cell.classList.remove('player'));
+  const index = playerPosition.y * 25 + playerPosition.x;
+  const cells = document.querySelectorAll('#gameCanvas .cell');
+
+  // 确保index在有效范围内
+  if (index >= 0 && index < cells.length) {
+    cells[index].classList.add('player');
+  }
+}
+
+function updateNpcPositions() {
+  document.querySelectorAll('.npc').forEach(cell => cell.classList.remove('npc'));
+  npcs.forEach(npc => {
+    const index = npc.y * 25 + npc.x;
+    const cells = document.querySelectorAll('#gameCanvas .cell');
+
+    // 确保index在有效范围内
+    if (index >= 0 && index < cells.length) {
+      cells[index].classList.add('npc');
+    }
+  });
+}
+
+function startNpcMovements() {
+  npcs.forEach((npc, index) => {
+    npcIntervals[index] = setInterval(() => {
+      const directions = [
+        { dx: 0, dy: -1 }, // 上 
+        { dx: 0, dy: 1 },  // 下
+        { dx: -1, dy: 0 }, // 左
+        { dx: 1, dy: 0 }   // 右
+      ];
+
+      // 随机选择一个方向
+      const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+      const newX = npc.x + randomDirection.dx;
+      const newY = npc.y + randomDirection.dy;
+
+      const maze = mazeData[currentLevel];
+
+      // 确保新位置在有效范围内并且不是墙壁
+      if (maze[newY] && maze[newY][newX] !== 1 && !npcs.some(otherNpc => otherNpc.x === newX && otherNpc.y === newY)) {
+        npc.x = newX;
+        npc.y = newY;
+        updateNpcPositions();
+        
+        // 检测npc与玩家的碰撞
+        checkCollision();
+      }
+    }, 50); // 每50毫秒移动一次
+  });
+}
+
+function clearNpcIntervals() {
+  npcIntervals.forEach(interval => clearInterval(interval));
+  npcIntervals = []; // 清空定时器数组
+}
+
+function checkCollision() {
+  npcs.forEach(npc => {
+    if (npc.x === playerPosition.x && npc.y === playerPosition.y) {
+      playSound('gameLose'); // 播放失败音效
+      showModal('被恐布抓了', true); // 传递失败状态
+      clearNpcIntervals(); // 停止所有npc移动
+    }
+  });
+}
+
+function movePlayer(dx, dy) {
+  clearInterval(moveInterval);
+  moveDirection = { dx, dy };
+  moveInterval = setInterval(() => {
+    const newX = playerPosition.x + moveDirection.dx;
+    const newY = playerPosition.y + moveDirection.dy;
+    const maze = mazeData[currentLevel];
+
+    // 检查新的位置是否是墙壁
+    if (maze[newY][newX] !== 1) {
+      playerPosition.x = newX;
+      playerPosition.y = newY;
+      updatePlayerPosition();
+      checkCollision(); // 每次移动后检查与npc的碰撞
+
+      // 检查是否到达出口
+      if (maze[newY][newX] === 8) {
+        playSound('gameWin'); // 播放通关音效
+        showModal('通关了!', false); // 传递成功状态
+        clearInterval(moveInterval);
+        calculateStars(); // 计算星级
+        unlockNextLevel(); // 解锁下一个关卡
+        saveProgress(); // 保存进度
+      } else if (maze[newY][newX] === 2) {
+        playSound('teleport'); // 播放传送音效
+        teleportPlayer();
+      } else if ([3, 4, 5, 7].includes(maze[newY][newX])) {
+        teleportToStart();
+      } else if (isAtIntersection(newX, newY, maze)) {
+        // 在交岔口停止移动
+        clearInterval(moveInterval);
+      }
+    } else {
+      // 如果遇到墙检查是否有转角
+      const turnDirection = checkForTurn(playerPosition.x, playerPosition.y, moveDirection);
+      if (turnDirection) {
+        // 如果有转角更新移动方向并继续移动
+        moveDirection = turnDirection;
+      } else {
+        // 如没有转角停止移动
+        clearInterval(moveInterval);
+      }
+    }
+  }, 30); // 移动速度
+}
+
+// 检查是否可以转弯的函数
+function checkForTurn(x, y, direction) {
+  const maze = mazeData[currentLevel];
+  const directions = {
+    up: { dx: 0, dy: -1 },
+    down: { dx: 0, dy: 1 },
+    left: { dx: -1, dy: 0 },
+    right: { dx: 1, dy: 0 },
+  };
+  let currentDirectionName;
+  for (const [key, value] of Object.entries(directions)) {
+    if (value.dx === direction.dx && value.dy === direction.dy) {
+      currentDirectionName = key;
+      break;
+    }
+  }
+
+  const turnOptions = [];
+  // 检查左转
+  const leftTurnDirection = {
+    up: directions.left,
+    down: directions.right,
+    left: directions.down,
+    right: directions.up,
+  }[currentDirectionName];
+  const leftX = x + leftTurnDirection.dx;
+  const leftY = y + leftTurnDirection.dy;
+
+  if (maze[leftY] && maze[leftY][leftX] !== 1) {
+    turnOptions.push(leftTurnDirection);
+  }
+  // 检查右转
+  const rightTurnDirection = {
+    up: directions.right,
+    down: directions.left,
+    left: directions.up,
+    right: directions.down,
+  }[currentDirectionName];
+  const rightX = x + rightTurnDirection.dx;
+  const rightY = y + rightTurnDirection.dy;
+
+  if (maze[rightY] && maze[rightY][rightX] !== 1) {
+    turnOptions.push(rightTurnDirection);
+  }
+  // 检查前方是否仍然可以通行
+  const forwardX = x + direction.dx;
+  const forwardY = y + direction.dy;
+  // 如前方可以通行且存在多个转角选项则停止移动等待操作
+  if (maze[forwardY] && maze[forwardY][forwardX] !== 1) {
+    if (turnOptions.length > 1) {
+      return null; // 返回 null 以指示需要等待操作
+    }
+    return direction; // 继续当前方向
+  }
+  // 如有多个转角选项返回 null 停止移动
+  if (turnOptions.length > 1) {
+    return null; // 返回 null 以指示需要等待操作
+  }
+  // 选择一个可转弯的方向
+  if (turnOptions.length === 1) {
+    return turnOptions[0]; // 只有一个转弯方向
+  }
+  // 如没有转弯方向返回 null
+  return null;
+}
+
+function showModal(message, isGameOver) {
+  document.getElementById('modalMessage').textContent = message;
+  const modal = document.getElementById('myModal');
+  const modalContent = document.querySelector('.modal-content');
+
+  modal.style.display = 'block'; // 显示模态框
+  modalContent.style.animation = 'modalShow 0.5s forwards'; // 添加显示动画
+
+  // 随机背景图函数
+  function getRandomBackground(isGameOver) {
+    const backgrounds = isGameOver ? [ 
+      'url(\'./img/gif/一二15.gif\')',
+      'url(\'./img/gif/一二12.gif\')',
+      'url(\'./img/gif/一二16.gif\')',
+      'url(\'./img/gif/一二11.gif\')',
+      'url(\'./img/gif/一二22.gif\')'
+    ] : [
+      'url(\'./img/gif/布一二1.gif\')',
+      'url(\'./img/gif/布一二.gif\')',
+      'url(\'./img/gif/一二17.gif\')',
+      'url(\'./img/gif/布布7.gif\')',
+      'url(\'./img/gif/一二10.gif\')'
+    ];
+    const randomIndex = Math.floor(Math.random() * backgrounds.length);
+    return backgrounds[randomIndex];
+  }
+
+  // 根据游戏状态设置按钮文本和背景图
+  if (isGameOver) {
+    if (navigator.vibrate) {
+      navigator.vibrate(300); // 震动 300 毫秒
+    }
+    modalContent.style.backgroundImage = getRandomBackground(true); // 游戏失败随机背景
+    document.getElementById('modalMessage').style.color = 'red'; // 游戏失败字体红色
+    document.getElementById('confirmButton').textContent = ''; // 清空文本
+    document.getElementById('confirmButton').style.backgroundImage = "url('img/svg/重新挑战.svg')"; // 设置重新挑战按钮背景图
+    document.getElementById('starRating').textContent = ''; // 清空星级显示
+    document.getElementById('starRating').style.display = 'none'; // 隐藏星级显示
+    document.getElementById('confirmButton').onclick = () => {
+      restartLevel(); // 重新开始当前关卡
+      closeModal();
+    };
+  } else {
+    modalContent.style.backgroundImage = getRandomBackground(false); // 游戏通关随机背景
+    document.getElementById('modalMessage').style.color = '#30DFF4'; // 游戏通关蓝色字体
+    document.getElementById('starRating').textContent = `${'★'.repeat(levelStars[currentLevel])}${'☆'.repeat(3 - levelStars[currentLevel])}`;
+    document.getElementById('starRating').style.display = 'block'; // 显示星级
+    document.getElementById('confirmButton').style.backgroundImage = "url('img/svg/下一关.svg')"; // 设置下一关按钮背景图
+    if (currentLevel + 1 < mazeData.length) {
+      document.getElementById('confirmButton').onclick = () => {
+        currentLevel++;
+        showPage('gamePage');
+        closeModal();
+      };
+    } else {
+      document.getElementById('confirmButton').style.display = 'none';
+      document.getElementById('modalMessage').textContent = '完成所有关卡!';
+      document.getElementById('cancelButton').onclick = () => {
+        showPage('levelPage');
+        closeModal();
+      };
+    }
+  }
+
+  document.getElementById('cancelButton').onclick = () => {
+    showPage('levelPage');
+    closeModal();
+  };
+}
+
+
+function closeModal() {
+  const modalContent = document.querySelector('.modal-content');
+  modalContent.style.animation = 'modalHide 0.5s forwards'; // 添加隐藏动画
+
+  // 动画结束后隐藏模态框
+  modalContent.addEventListener('animationend', () => {
+    document.getElementById('myModal').style.display = 'none';
+    modalContent.style.animation = ''; // 清除动画
+  }, { once: true }); // 只执行一次
+}
+
+function calculateStars() {
+  let stars = 0;
+  const endTime = Date.now();
+  const timeTaken = (endTime - startTime) / 1000; // 计算通关时间（秒）
+
+  if (timeTaken <= 60) {
+    stars = 3; // 通关时间<60秒
+  } else if (timeTaken <= 90) {
+    stars = 2; // 通关时间≥60秒且不超过90秒
+  } else {
+    stars = 1; // 通关时间>90秒
+  }
+
+  levelStars[currentLevel] = stars; // 记录当前关卡的星级
+  document.getElementById('starRating').textContent = `${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}`;
+}
+
+function unlockNextLevel() {
+  if (currentLevel + 1 < mazeData.length && !unlockedLevels.includes(currentLevel + 1)) {
+    unlockedLevels.push(currentLevel + 1);
+  }
+}
+
+function goToHomePage() {
+  closeModal(); // 关闭模态框
+  showPage('homePage'); // 显示首页
+}
+
+function restartLevel() {
+  playerPosition = { x: 1, y: 1 }; // 重置玩家位置
+  loadGame(currentLevel); // 重新加载当前关卡
+  startTime = Date.now(); // 记录开始时间
+  showPage('gamePage'); // 显示游戏页面
+}
+
+function teleportPlayer() {
+  const possiblePortals = [];
+  mazeData[currentLevel].forEach((row, y) => {
+    row.forEach((cell, x) => {
+      if ([3, 4, 5, 7].includes(cell)) {
+        possiblePortals.push({ x, y });
+      }
+    });
+  });
+  if (possiblePortals.length > 0) {
+    const randomPortal = possiblePortals[Math.floor(Math.random() * possiblePortals.length)];
+    playerPosition = randomPortal;
+    updatePlayerPosition();
+    playSound('teleport'); // 播放传送音效
+    moveForward(); // 经过传送门时条件允许则向前一步
+  }
+}
+
+function moveForward() {
+  const maze = mazeData[currentLevel];
+  const directions = [
+    { dx: 0, dy: -1 }, // 上
+    { dx: 0, dy: 1 },  // 下
+    { dx: -1, dy: 0 }, // 左
+    { dx: 1, dy: 0 }   // 右
+  ];
+  for (const { dx, dy } of directions) {
+    const newX = playerPosition.x + dx;
+    const newY = playerPosition.y + dy;
+    if (maze[newY] && maze[newY][newX] === 0) {
+      playerPosition.x = newX;
+      playerPosition.y = newY;
+      updatePlayerPosition();
+      break;
+    }
+  }
+}
+
+function teleportToStart() {
+  mazeData[currentLevel].forEach((row, y) => {
+    row.forEach((cell, x) => {
+      if (cell === 2) {
+        playerPosition = { x, y };
+        updatePlayerPosition();
+        moveForward(); // 经过传送门时条件允许则向前一步
+      }
+    });
+  });
+}
+
+function isAtIntersection(x, y, maze) {
+  const directions = [
+    [0, -1], // 上
+    [0, 1],  // 下
+    [-1, 0], // 左
+    [1, 0]   // 右
+  ];
+  let pathCount = 0;
+  directions.forEach(([dx, dy]) => {
+    if (maze[y + dy] && maze[y + dy][x + dx] === 0) {
+      pathCount++;
+    }
+  });
+  return pathCount > 2; // 如果路径数量大于2，表示是交岔口
+}
+
+// BGM开关函数
+function toggleMusic() {
+  if (isMusicPlaying) {
+    backgroundMusic.pause(); // 停止BGM
+    document.getElementById('musicToggleButton').style.backgroundImage = "url('img/svg/关.svg')";
+  } else {
+    backgroundMusic.play(); // 播放BGM
+    document.getElementById('musicToggleButton').style.backgroundImage = "url('img/svg/开.svg')";
+  }
+  isMusicPlaying = !isMusicPlaying; // 切换状态
+  localStorage.setItem('isMusicPlaying', isMusicPlaying); // 保存BGM状态
+}
+
+// 保存游戏进度
+function saveProgress() {
+  localStorage.setItem('unlockedLevels', JSON.stringify(unlockedLevels));
+  localStorage.setItem('levelStars', JSON.stringify(levelStars));
+}
+
+// 页面加载播放BGM ━ 初始图标
+window.onload = function() {
+  const musicToggleButton = document.getElementById('musicToggleButton');
+
+  // 检查本地存储中的BGM状态
+  isMusicPlaying = localStorage.getItem('isMusicPlaying') === 'true';
+
+  // 根据记录状态播放或暂停BGM
+  if (isMusicPlaying) {
+    backgroundMusic.play();
+    musicToggleButton.style.backgroundImage = "url('img/svg/开.svg')";
+  } else {
+    backgroundMusic.pause();
+    musicToggleButton.style.backgroundImage = "url('img/svg/关.svg')";
+  }
+
+  // 交互事件监听器
+  document.addEventListener('click', tryToPlayMusic);
+};
+
+
+// 页面不可见时暂停BGM
+function onPause() {
+  if (backgroundMusic) {
+    backgroundMusic.pause();
+  }
+}
+// 页面可见时恢复BGM
+function onResume() {
+  if (isMusicPlaying) {
+    backgroundMusic.play();
+  }
+}
+// 监听 pagehide 事件
+window.addEventListener('pagehide', onPause);
+
+// 监听 visibilitychange 事件
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden') {
+    onPause();
+  } else if (document.visibilityState === 'visible') {
+    onResume();
+  }
+});
+
+
+// 触摸事件处理
+document.addEventListener('touchstart', handleTouchStart, false);
+document.addEventListener('touchmove', handleTouchMove, false);
+
+let xDown = null;
+let yDown = null;
+
+function handleTouchStart(evt) {
+  const firstTouch = evt.touches[0];
+  xDown = firstTouch.clientX;
+  yDown = firstTouch.clientY;
+}
+
+function handleTouchMove(evt) {
+  if (!xDown || !yDown || !isGameActive) { // 只有在游戏进行中才处理滑动
+    return;
+  }
+
+  const xUp = evt.touches[0].clientX;
+  const yUp = evt.touches[0].clientY;
+
+  const xDiff = xDown - xUp;
+  const yDiff = yDown - yUp;
+
+  if (Math.abs(xDiff) > Math.abs(yDiff)) {
+    if (xDiff > 0) {
+      movePlayer(-1, 0);
+    } else {
+      movePlayer(1, 0);
+    }
+  } else {
+    if (yDiff > 0) {
+      movePlayer(0, -1);
+    } else {
+      movePlayer(0, 1);
+    }
+  }
+
+  xDown = null;
+  yDown = null;
+}
+
+// =============区域=================
+// 分享
+function shareApp() {
+  const apkDownloadUrl = 'unll';
+
+  window.webapp.share({
+    type: 'link',
+    url: apkDownloadUrl,
+    title: 'Download Our App',
+    description: 'Get the latest version of our app by downloading the APK file.',
+    packageName: 'com.example.yourapp'
+  });
+}
+
+
+// =============区域=================
+window.webapp.entire(true);
+window.webapp.night(false);
+window.webapp.circle(false);
+window.webapp.renew(false);
+window.webapp.unfold(true);
+
+// 初始化UI
+initUI();
+
+</script>
+</body>
+</html>
+
+
